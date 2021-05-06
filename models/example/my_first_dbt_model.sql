@@ -17,8 +17,7 @@ with source_data as (
 
 )
 
-select *
-from source_data
+SELECT * FROM `bigquery-public-data.cms_medicare.hospital_general_info` LIMIT 1000
 
 /*
     Uncomment the line below to remove records with null `id` values
