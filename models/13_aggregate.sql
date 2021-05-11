@@ -7,6 +7,6 @@ SELECT
     AVG(average_allowed) AS average_average_allowed,
     AVG(average_charged) AS average_average_charged,
     AVG(average_paid) AS average_average_paid
-FROM {{ ref("model11") }}
+FROM {{ ref("12_physicians_hospital") }}
 WHERE provider_id IS NOT NULL
 GROUP BY provider_id, hospital_name, provider_type
