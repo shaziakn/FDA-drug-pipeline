@@ -13,40 +13,199 @@ sources:
 
 models:
     - name: 01_hospital_general_info
-      description: "incremental materialization"
+      description: "Materialized the hospital_general_info table as incremental since it is the only table that will be frequently updated for changing patient experiences in each hospital over time."
+      columns:
+        - name: provider_id
+          tests:
+            - unique
+            - not_null
+
     - name: 02_inpatient_all
-      description: "Union all inpatient_charges views"
+      description: "Concatenated all inpatient_charges tables together into one view."
+      columns:
+        - name: provider_id
+          tests:
+            - not_null
+        - name: provider_name
+          tests:
+            - not_null
+
     - name: 03_experience_cost
-      description: "How costs are associated with patient experience"
+      description: "Determined how costs are associated with patient experience in inpatient facilities through an inner join between inpatient_all and hospital_general_info. It appears that hospitals with patient experience ratings above the national average incur the most total and medicare costs. Patient experience ratings below the national average incur the most covered costs."
+      columns:
+        - name: patient_experience_national_comparison
+          tests:
+            - unique
+            - accepted_values:
+                values: ['Above the national average', 'Below the national average', 'Same as the national average', 'Not Available']
+
     - name: 04_ownership_experience_cost
-      description: "How costs are associated with patient experience by hospital ownership"
+      description: "Determined how costs are associated with patient experience by hospital ownership through an inner join between inpatient_all and hospital_general_info. Hospitals owned by state governments incur the most total and medicare costs regardless of patient experience. Physicians with patient experience ratings below the national average incur the most covered costs."
+      columns:
+        - name: hospital_ownership
+          tests:
+            - not_null
+        - name: patient_experience_national_comparison
+          tests:
+            - accepted_values:
+                values: ['Above the national average', 'Below the national average', 'Same as the national average', 'Not Available']
+
     - name: 05_state_experience_cost
-      description: "How costs are associated with patient experience by state"
+      description: "Determined how costs are associated with patient experience by state through an inner join between inpatient_all and hospital_general_info. The state of Wyoming incurs the most total and medicare costs with a patient experience of above the national average. The state of Hawaii incurs the most covered costs with a patient experience rating above the national average."
+      columns:
+        - name: state
+          tests:
+            - not_null
+        - name: patient_experience_national_comparison
+          tests:
+            - accepted_values:
+                values: ['Above the national average', 'Below the national average', 'Same as the national average', 'Not Available']
+
     - name: 06_physicians_2012
-      description: "Clean physicians_and_other_supplier_2012"
+      description: "Performed a group by and aggregation functions to clean the physicians_and_other_supplier_2012 for relevant information."
+      columns:
+        - name: npi
+          tests:
+            - not_null
+        - name: last_name
+          tests:
+            - not_null
+        - name: first_name
+          tests:
+            - not_null
+
     - name: 07_physicians_2013
-      description: "Clean physicians_and_other_supplier_2013"
+      description: "Performed a group by and aggregation functions to clean the physicians_and_other_supplier_2013 for relevant information."
+      columns:
+        - name: npi
+          tests:
+            - not_null
+        - name: last_name
+          tests:
+            - not_null
+        - name: first_name
+          tests:
+            - not_null
+
     - name: 08_physicians_2014
-      description: "Clean physicians_and_other_supplier_2014"
+      description: "Performed a group by and aggregation functions to clean the physicians_and_other_supplier_2014 for relevant information."
+      columns:
+        - name: npi
+          tests:
+            - not_null
+        - name: last_name
+          tests:
+            - not_null
+        - name: first_name
+          tests:
+            - not_null
+
     - name: 09_physicians_all
-      description: "Union clean physicians_and_other_supplier"
+      description: "Concatenated all physicians views together into one view."
+      columns:
+        - name: npi
+          tests:
+            - not_null
+        - name: last_name
+          tests:
+            - not_null
+        - name: first_name
+          tests:
+            - not_null
+
     - name: 10_clean_physicians_all
-      description: "Fix directions for all physicians_and_other_supplier"
+      description: "Standardized compass directions (N, S, E, W) for all addresses within the concatenated physicians view."
+      columns:
+        - name: npi
+          tests:
+            - not_null
+        - name: last_name
+          tests:
+            - not_null
+        - name: first_name
+          tests:
+            - not_null
+
     - name: 11_clean_hospital_general_info
-      description: "Fix directions for hospital_general_info"
+      description: "Standardized compass directions (N, S, E, W) for all addresses within the hospital_general_info table."
+      columns:
+        - name: provider_id
+          tests:
+            - unique
+            - not_null
+
     - name: 12_physicians_hospital
-      description: "Merge clean physicians_and_other_suppliers with clean hospital_general_info"
+      description: "Performed a left outer join between cleaned physicians view and cleaned hospital_general_info view on city, zip code, address in order to account for all physicians who both worked at hospitals and served as independent contractors."
+      columns:
+        - name: npi
+          tests:
+            - not_null
+            - relationships:
+                to: ref('10_clean_physicians_all')
+                field: 'npi'
+        - name: last_name
+          tests:
+            - not_null
+        - name: first_name
+          tests:
+            - not_null
+        - name: hospital_name
+          tests:
+            - relationships:
+                to: ref('11_clean_hospital_general_info')
+                field: 'hospital_name'
+
     - name: 13_aggregate
-      description: "Group by hospital and provider type"
+      description: "Performed a group by for physicians, hospitals, and provider_type to obtain aggregations of number of services available, number of services used, and average cost for each provider_type."
+      columns:
+        - name: provider_id
+          tests:
+            - not_null
+        - name: hospital_name
+          tests:
+            - not_null
+        - name: provider_type
+          tests:
+            - not_null
+
     - name: 14_services_ranked
-      description: "WINDOW FUNCTION TO FIND RANK OF MEDICARE/MEDICAID SERVICES"
+      description: "Used a window function to find the rankings of the number of medicare/medicaid services for each provider_type."
+      columns:
+        - name: services_rank
+          tests:
+            - not_null
+
     - name: 15_top_providers_by_services
-      description: "Departments with the most services"
+      description: "A table of departments with the most services offered."
+      columns:
+        - name: provider_type
+          tests:
+            - not_null
+
     - name: 16_services_used_ranked
-      description: "WINDOW FUNCTION TO FIND RANK OF MEDICARE/MEDICAID BENEFICIARIES"
+      description: "Used a window function to find the rankings of the number of medicare/medicaid services used by beneficiaries for each provider_type."
+      columns:
+        - name: beneficiaries_rank
+          tests:
+            - not_null
+
     - name: 17_top_providers_by_services_used
-      description: "Departments with the most services used by beneficiaries"
+      description: "A table of departments with the most services used by beneficiaries."
+      columns:
+        - name: provider_type
+          tests:
+            - not_null
+
     - name: 18_avg_charges_ranked
-      description: "WINDOW FUNCTION TO FIND RANK OF MEDICARE/MEDICAID CHARGES"
+      description: "Used a window function to find the rankings of the average medicare/medicaid charges per provider_type."
+      columns:
+        - name: charges_rank
+          tests:
+            - not_null
+
     - name: 19_top_providers_by_charges
-      description: "Most expensive departments"
+      description: "A table of the departments that charge the most for their services."
+      columns:
+        - name: provider_type
+          tests:
+            - not_null
