@@ -1,0 +1,52 @@
+version: 2
+sources:
+  - name: cms_medicare
+    description: "A replica of the bigquery dataset called cms_medicare."
+    tables:
+      - name: hospital_general_info
+      - name: inpatient_charges_2012
+      - name: inpatient_charges_2013
+      - name: inpatient_charges_2014
+      - name: physicians_and_other_supplier_2012
+      - name: physicians_and_other_supplier_2013
+      - name: physicians_and_other_supplier_2014
+
+models:
+    - name: hospital_general_info
+      description: "incremental materialization"
+    - name: model1
+      description: "Union all inpatient_charges views"
+    - name: model2
+      description: "How costs are associated with patient experience"
+    - name: model3
+      description: "How costs are associated with patient experience by hospital ownership"
+    - name: model4
+      description: "How costs are associated with patient experience by state"
+    - name: model5
+      description: "Clean physicians_and_other_supplier_2012"
+    - name: model6
+      description: "Clean physicians_and_other_supplier_2013"
+    - name: model7
+      description: "Clean physicians_and_other_supplier_2014"
+    - name: model8
+      description: "Union clean physicians_and_other_supplier"
+    - name: model9
+      description: "Fix directions for all physicians_and_other_supplier"
+    - name: model10
+      description: "Fix directions for hospital_general_info"
+    - name: model11
+      description: "Merge clean physicians_and_other_suppliers with clean hospital_general_info"
+    - name: model12
+      description: "Group by hospital and provider type"
+    - name: model13
+      description: "WINDOW FUNCTION TO FIND RANK OF MEDICARE/MEDICAID SERVICES"
+    - name: model14
+      description: "Departments with the most services"
+    - name: model15
+      description: "WINDOW FUNCTION TO FIND RANK OF MEDICARE/MEDICAID BENEFICIARIES"
+    - name: model16
+      description: "Departments with the most services used by beneficiaries"
+    - name: model17
+      description: "WINDOW FUNCTION TO FIND RANK OF MEDICARE/MEDICAID CHARGES"
+    - name: model18
+      description: "Most expensive departments"
