@@ -16,6 +16,8 @@ We hypothesize that healthcare facilities with higher-than-average scores in pat
 
 ### Model Structure
 
+![alt text](https://github.com/shaziakn/medicare_pipeline/blob/add-practice-model/lineage_graph.png?raw=true)
+
 From start to finish, the data pipeline took us six days to write. The pipeline took 21.49 seconds to run and the tests took 145.27 seconds to complete.
 We built 19 models for our project, and our pipeline has a depth of seven. We began our pipeline with the seven datasets described in our Overview and have included snippets of the seven tables in the Appendix. Our pipeline can be divided into several discrete steps:
 
